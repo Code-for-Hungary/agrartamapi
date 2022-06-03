@@ -62,6 +62,18 @@ class SearchController extends Controller
         if ($request->tamogatott) {
             $q->where('tamogatott_id', $request->tamogatott);
         }
+        if ($request->tamosszegtol) {
+            $q->where('osszeg', '>=', $request->tamosszegtol);
+        }
+        if ($request->tamosszegig) {
+            $q->where('osszeg', '<=', $request->tamosszegig);
+        }
+        if ($request->evestamosszegtol) {
+            $q->where('evesosszeg', '>=', $request->evestamosszegtol);
+        }
+        if ($request->evestamosszegig) {
+            $q->where('evesosszeg', '<=', $request->evestamosszegig);
+        }
         return $q;
     }
 
