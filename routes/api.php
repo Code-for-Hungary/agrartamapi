@@ -50,4 +50,4 @@ Route::get('/cegcsoports/{cegcsoport}', [CegcsoportController::class, 'show']);
 Route::get('/tamogatotts', [TamogatottController::class, 'index']);
 Route::get('/tamogatotts/{tamogatott}', [TamogatottController::class, 'show']);
 
-Route::get('/tamogatasosszeg', [TamogatasOsszegController::class]);
+Route::get('/tamogatasosszeg', TamogatasOsszegController::class);
