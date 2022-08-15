@@ -10,6 +10,7 @@ use App\Http\Controllers\CegcsoportController;
 use App\Http\Controllers\TamogatottController;
 use App\Http\Controllers\EvController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\TamogatasOsszegController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,3 +49,5 @@ Route::get('/cegcsoports/{cegcsoport}', [CegcsoportController::class, 'show']);
 
 Route::get('/tamogatotts', [TamogatottController::class, 'index']);
 Route::get('/tamogatotts/{tamogatott}', [TamogatottController::class, 'show']);
+
+Route::get('/tamogatasosszeg', [TamogatasOsszegController::class]);
