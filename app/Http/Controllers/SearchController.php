@@ -50,11 +50,11 @@ class SearchController extends Controller
         if ($request->jogcim && is_array($request->jogcim)) {
             $q->whereIn('jogcim_id', $request->jogcim);
         }
-        if ($request->alap) {
-            $q->where('alap_id', $request->alap);
+        if ($request->alap && is_array($request->alap)) {
+            $q->whereIn('alap_id', $request->alap);
         }
-        if ($request->forras) {
-            $q->where('forras_id', $request->forras);
+        if ($request->forras && is_array($request->forras)) {
+            $q->whereIn('forras_id', $request->forras);
         }
         if ($request->cegcsoport && is_array($request->cegcsoport)) {
             $q->whereIn('cegcsoport_id', $request->cegcsoport);
