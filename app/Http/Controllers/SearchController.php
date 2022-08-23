@@ -17,8 +17,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\CountResource;
+use App\Http\Resources\TamogatasExcelResource;
 use App\Models\Tamogatas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class SearchController extends Controller
 {
@@ -107,5 +112,39 @@ class SearchController extends Controller
     public function count(Request $request) {
         $ret = new CountResource($this->makeQuery($request)->count());
         return $ret;
+    }
+
+    public function exportforedit(Request $request) {
+        $excel = new Spreadsheet();
+
+        $excel->getProperties()
+            ->setCreator('K-Monitor Agrártámogatás projekt')
+            ->setTitle('Agrártámogatás adatbázis részlet')
+            ->setDescription('Agrártámogatás adatbázis részlet');
+
+        $sheet = $excel->setActiveSheetIndex(0);
+        foreach (TamogatasExcelResource::getHeader() as $head) {
+            $sheet->setCellValue($head['col'] . '1', $head['data']);
+        }
+
+        $sor = 2;
+        $this->makeQuery($request)->lazy()->each(function ($tam) use ($request, $sheet, &$sor) {
+            $resource = new TamogatasExcelResource($tam);
+            $res = $resource->toArray($request);
+            foreach ($res as $item) {
+                $sheet->setCellValue($item['col'] . $sor, $item['data']);
+            }
+            $sor++;
+        });
+        $excel->getActiveSheet()->getStyle('V1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+        $writer = IOFactory::createWriter($excel, 'Xlsx');
+        $filename = 'agrar_' . Str::uuid() . '.xlsx';
+        $pathfilename = public_path('storage/') . $filename;
+        $writer->save($pathfilename);
+
+        return [
+            'data' => asset('storage/' . $filename, true)
+        ];
     }
 }

@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/search', [SearchController::class, 'index']);
 Route::post('/count', [SearchController::class, 'count']);
+Route::post('/exportforedit', [SearchController::class, 'exportforedit']);
 
 Route::get('/evs', [EvController::class, 'index']);
 
