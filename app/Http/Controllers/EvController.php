@@ -50,6 +50,6 @@ class EvController extends Controller
      */
     public function index()
     {
-        return EvResource::collection(Tamogatas::select(['ev'])->distinct(['ev'])->orderBy('ev', 'asc')->get());
+        return EvResource::collection(Tamogatas::select(['ev'])->distinct(['ev'])->orderBy('ev', 'desc')->get());
     }
 }
