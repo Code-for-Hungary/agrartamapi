@@ -38,7 +38,7 @@ class SearchController extends Controller
             $q->where('gender', $request->gender);
         }
         if ($request->nev) {
-            $q->whereFullText('name', $request->nev);
+            $q->whereFullText('name', $request->nev, ['mode' => 'boolean']);
         }
         if ($request->ev && is_array($request->ev)) {
             $q->whereIn('ev', $request->ev);
