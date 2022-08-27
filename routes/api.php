@@ -11,6 +11,7 @@ use App\Http\Controllers\TamogatottController;
 use App\Http\Controllers\EvController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TamogatasOsszegController;
+use App\Http\Controllers\EvesTamogatasOsszegController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,3 +53,4 @@ Route::get('/tamogatotts', [TamogatottController::class, 'index']);
 Route::get('/tamogatotts/{tamogatott}', [TamogatottController::class, 'show']);
 
 Route::get('/tamogatasosszeg', TamogatasOsszegController::class);
+Route::get('/evestamogatasosszeg', EvesTamogatasOsszegController::class);
