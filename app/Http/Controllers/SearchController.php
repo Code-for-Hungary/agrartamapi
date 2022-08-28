@@ -18,6 +18,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\CountResource;
 use App\Http\Resources\TamogatasExcelResource;
+use App\Http\Resources\TamogatasResourceCollection;
 use App\Models\Tamogatas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -27,8 +28,14 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class SearchController extends Controller
 {
-    protected function makeQuery($request) {
-        $q = Tamogatas::select();
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function makeQuery(Request $request) {
+        $q = Tamogatas::with(['megye', 'cegcsoport', 'tamogatott', 'jogcim', 'alap', 'forras']);
+
         // ha cég nem 'mindegy'
         if ($request->isfirm === '0' || $request->isfirm === '1') {
             $q->where('is_firm', $request->isfirm);
@@ -79,6 +86,7 @@ class SearchController extends Controller
         if (!is_null($request->evestamosszegig)) {
             $q->where('evesosszeg', '<=', $request->evestamosszegig);
         }
+
         return $q;
     }
 
@@ -102,11 +110,10 @@ class SearchController extends Controller
      *          ]
      *      }
      *
-     * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
-        return null;
+        return new TamogatasResourceCollection($this->makeQuery($request)->paginate($request->per_page));
     }
 
     public function count(Request $request) {
