@@ -12,6 +12,7 @@ use App\Http\Controllers\EvController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TamogatasOsszegController;
 use App\Http\Controllers\EvesTamogatasOsszegController;
+use App\Http\Controllers\ImportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +32,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/search', [SearchController::class, 'index']);
 Route::post('/count', [SearchController::class, 'count']);
 Route::post('/exportforedit', [SearchController::class, 'exportforedit']);
+Route::post('/import', ImportController::class);
 
 Route::get('/evs', [EvController::class, 'index']);
 
