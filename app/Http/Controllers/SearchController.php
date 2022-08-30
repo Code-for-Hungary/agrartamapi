@@ -143,7 +143,7 @@ class SearchController extends Controller
             }
             $sor++;
         });
-        $excel->getActiveSheet()->getStyle('V1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $excel->getActiveSheet()->getStyle('S1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
         $writer = IOFactory::createWriter($excel, 'Xlsx');
         $filename = 'agrar_' . Str::uuid() . '.xlsx';
