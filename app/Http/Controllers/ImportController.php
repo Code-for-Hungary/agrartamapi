@@ -11,6 +11,7 @@ use App\Models\Megye;
 use App\Models\Tamogatas;
 use App\Models\Tamogatott;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -117,7 +118,7 @@ class ImportController extends Controller
         if (!$name) {
             return false;
         }
-        $tam = new Tamogatas();
+        $tam = new Tamogatott();
         $tam->id = $id;
         $tam->name = $name;
         $tam->save();
@@ -179,16 +180,33 @@ class ImportController extends Controller
 
             $error = [];
 
+            DB::beginTransaction();
+
             $id = $sheet->getCell('A' . $row)->getValue();
 
             $ev = (int)$sheet->getCell('B' . $row)->getValue();
-            if (!$ev || ($ev < 2010 && $ev > date('Y'))) {
+            if (!$ev || $ev < 2010 || $ev > (int)date('Y')) {
                 $error[] = 'Hibás év';
             }
 
             $nev = (string)$sheet->getCell('C' . $row)->getValue();
             if (!$nev) {
                 $error[] = 'Üres név';
+            }
+
+            $irszam = (string)$sheet->getCell('F' . $row)->getValue();
+            if (!$irszam) {
+                $error[] = 'Üres ir.szám';
+            }
+
+            $varos = (string)$sheet->getCell('G' . $row)->getValue();
+            if (!$varos) {
+                $error[] = 'Üres város';
+            }
+
+            $utca = (string)$sheet->getCell('H' . $row)->getValue();
+            if (!$utca) {
+                $error[] = 'Üres utca';
             }
 
             $is_firm = (boolean)$sheet->getCell('E' . $row)->getValue();
@@ -245,6 +263,9 @@ class ImportController extends Controller
             }
 
             if ($error) {
+
+                DB::rollBack();
+
                 foreach (TamogatasExcelResource::getHeader() as $head) {
                     $errorsheet->setCellValue(
                         $head['col'] . $errow,
@@ -259,9 +280,9 @@ class ImportController extends Controller
                 $tam->name = $nev;
                 $tam->gender = $gender;
                 $tam->is_firm = $is_firm;
-                $tam->irszam = $sheet->getCell('F' . $row)->getValue();
-                $tam->varos = $sheet->getCell('G' . $row)->getValue();
-                $tam->utca = $sheet->getCell('H' . $row)->getValue();
+                $tam->irszam = $irszam;
+                $tam->varos = $varos;
+                $tam->utca = $utca;
                 $tam->megye()->associate($megye);
                 $tam->cegcsoport()->associate($cegcsoport);
                 $tam->tamogatott()->associate($tamogatott);
@@ -270,6 +291,13 @@ class ImportController extends Controller
                 $tam->forras()->associate($this->getForras($forras_name));
                 $tam->is_landbased = (boolean)$sheet->getCell('R' . $row)->getValue();
                 $tam->osszeg = (int)$sheet->getCell('S' . $row)->getValue();
+                $tam->evesosszeg = 0;
+                $tam->point_lat = 0.0;
+                $tam->point_long = 0.0;
+                $tam->save();
+
+                DB::commit();
+
             }
         }
         if ($errow > 2) {
