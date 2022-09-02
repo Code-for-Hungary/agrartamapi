@@ -29,7 +29,7 @@ class ImportController extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function __invoke(Request $request)
@@ -44,12 +44,10 @@ class ImportController extends Controller
                     return redirect($errorurl);
                 }
                 return response('OK');
-            }
-            else {
+            } else {
                 return response('Baad request', 400);
             }
-        }
-        else {
+        } else {
             return response('Forbidden', 403);
         }
     }
@@ -164,6 +162,8 @@ class ImportController extends Controller
 
     protected function import($filepath)
     {
+        $valtozottak = [];
+
         $this->fillCaches();
 
         $excel = new Spreadsheet();
@@ -174,10 +174,9 @@ class ImportController extends Controller
         $errow = 2;
 
         $in = IOFactory::load($filepath);
-        $sheet = $in->getActiveSheet();
-        $maxrow = $sheet->getHighestRow();
+        $sheet = $in->setActiveSheetIndex(0);
+        $maxrow = $sheet->getHighestDataRow('S');
         for ($row = 2; $row <= $maxrow; ++$row) {
-
             $error = [];
 
             DB::beginTransaction();
@@ -215,55 +214,54 @@ class ImportController extends Controller
                 if ($gender !== 'male' && $gender !== 'female') {
                     $error[] = 'Természetes személynek nincs megadva gender';
                 }
-            }
-            else {
+            } else {
                 $gender = '';
             }
 
-            $megye_id = $sheet->getCell('I' . $row)->getValue();
-            $megye = $this->getMegye($megye_id);
+            if (!$error) {
+                $megye_id = $sheet->getCell('I' . $row)->getValue();
+                $megye = $this->getMegye($megye_id);
 
-            $cegcsoport_id = $sheet->getCell('K' . $row)->getValue();
-            $cegcsoport_name = $sheet->getCell('L' . $row)->getValue();
-            $cegcsoport = $this->getCegcsoport($cegcsoport_id, $cegcsoport_name);
-            if ($cegcsoport === false) {
-                $error[] = 'Új cégcsoport, de nincs név megadva';
-            }
-
-            $tamogatott_id = $sheet->getCell('M' . $row)->getValue();
-            $tamogatott_name = $sheet->getCell('N' . $row)->getValue();
-            $tamogatott = $this->getTamogatott($tamogatott_id, $tamogatott_name);
-            if ($tamogatott === false) {
-                $error[] = 'Új támogatott entitás, de nincs név megadva';
-            }
-
-            $jogcim_name = $sheet->getCell('O' . $row)->getValue();
-            if (!$jogcim_name) {
-                $error[] = 'Nincs jogcím név megadva';
-            }
-
-            $alap_name = $sheet->getCell('P' . $row)->getValue();
-            if (!$alap_name) {
-                $error[] = 'Nincs alap név megadva';
-            }
-
-            $forras_name = $sheet->getCell('Q' . $row)->getValue();
-            if (!$forras_name) {
-                $error[] = 'Nincs forrás név megadva';
-            }
-
-            if ($id) {
-                $tam = Tamogatas::find($id);
-                if (!$tam) {
-                    $error[] = 'Ismeretlen ID';
+                $cegcsoport_id = $sheet->getCell('K' . $row)->getValue();
+                $cegcsoport_name = $sheet->getCell('L' . $row)->getValue();
+                $cegcsoport = $this->getCegcsoport($cegcsoport_id, $cegcsoport_name);
+                if ($cegcsoport === false) {
+                    $error[] = 'Új cégcsoport, de nincs név megadva';
                 }
-            }
-            else {
-                $tam = new Tamogatas();
+
+                $tamogatott_id = $sheet->getCell('M' . $row)->getValue();
+                $tamogatott_name = $sheet->getCell('N' . $row)->getValue();
+                $tamogatott = $this->getTamogatott($tamogatott_id, $tamogatott_name);
+                if ($tamogatott === false) {
+                    $error[] = 'Új támogatott entitás, de nincs név megadva';
+                }
+
+                $jogcim_name = $sheet->getCell('O' . $row)->getValue();
+                if (!$jogcim_name) {
+                    $error[] = 'Nincs jogcím név megadva';
+                }
+
+                $alap_name = $sheet->getCell('P' . $row)->getValue();
+                if (!$alap_name) {
+                    $error[] = 'Nincs alap név megadva';
+                }
+
+                $forras_name = $sheet->getCell('Q' . $row)->getValue();
+                if (!$forras_name) {
+                    $error[] = 'Nincs forrás név megadva';
+                }
+
+                if ($id) {
+                    $tam = Tamogatas::find($id);
+                    if (!$tam) {
+                        $error[] = 'Ismeretlen ID';
+                    }
+                } else {
+                    $tam = new Tamogatas();
+                }
             }
 
             if ($error) {
-
                 DB::rollBack();
 
                 foreach (TamogatasExcelResource::getHeader() as $head) {
@@ -274,8 +272,7 @@ class ImportController extends Controller
                 }
                 $errorsheet->setCellValue('T' . $errow, implode('; ', $error));
                 $errow++;
-            }
-            else {
+            } else {
                 $tam->ev = $ev;
                 $tam->name = $nev;
                 $tam->gender = $gender;
@@ -296,10 +293,19 @@ class ImportController extends Controller
                 $tam->point_long = 0.0;
                 $tam->save();
 
+                $valtozottak[(string)$ev . $nev . $irszam . $varos . $utca] = [
+                    'ev' => $ev,
+                    'nev' => $nev,
+                    'irszam' => $irszam,
+                    'varos' => $varos,
+                    'utca' => $utca
+                ];
                 DB::commit();
-
             }
         }
+
+        $this->recalcEvesosszeg($valtozottak);
+
         if ($errow > 2) {
             $writer = IOFactory::createWriter($excel, 'Xlsx');
             $filename = 'agrar_' . Str::uuid() . '.xlsx';
@@ -308,6 +314,35 @@ class ImportController extends Controller
             return asset('storage/' . $filename, true);
         }
         return false;
+    }
+
+    private function recalcEvesosszeg($valtozottak)
+    {
+        foreach ($valtozottak as $item) {
+
+            DB::beginTransaction();
+
+            $evesosszeg = Tamogatas::where('ev', $item['ev'])
+                ->where('name', $item['nev'])
+                ->where('irszam', $item['irszam'])
+                ->where('varos', $item['varos'])
+                ->where('utca', $item['utca'])
+                ->sum('osszeg');
+
+            $sorok = Tamogatas::select()
+                ->where('ev', $item['ev'])
+                ->where('name', $item['nev'])
+                ->where('irszam', $item['irszam'])
+                ->where('varos', $item['varos'])
+                ->where('utca', $item['utca'])
+                ->get();
+            foreach ($sorok as $sor) {
+                $sor->evesosszeg = $evesosszeg;
+                $sor->save();
+            }
+
+            DB::commit();
+        }
     }
 
 }
