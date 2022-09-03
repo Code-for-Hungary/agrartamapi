@@ -13,6 +13,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TamogatasOsszegController;
 use App\Http\Controllers\EvesTamogatasOsszegController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\TelepulesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,6 +48,9 @@ Route::get('/jogcims/{jogcim}', [JogcimController::class, 'show']);
 
 Route::get('/megyes', [MegyeController::class, 'index']);
 Route::get('/megyes/{megye}', [MegyeController::class, 'show']);
+
+Route::get('/telepules', [TelepulesController::class, 'index']);
+Route::get('/telepules/{telepules}', [TelepulesController::class, 'show']);
 
 Route::get('/cegcsoports', [CegcsoportController::class, 'index']);
 Route::get('/cegcsoports/{cegcsoport}', [CegcsoportController::class, 'show']);
