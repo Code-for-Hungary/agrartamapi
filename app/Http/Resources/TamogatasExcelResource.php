@@ -30,10 +30,11 @@ class TamogatasExcelResource extends JsonResource
             ['col' => 'M', 'data' => $this->tamogatott_id],
             ['col' => 'N', 'data' => $this->tamogatott?->name],
             ['col' => 'O', 'data' => $this->jogcim?->name],
-            ['col' => 'P', 'data' => $this->alap?->name],
-            ['col' => 'Q', 'data' => $this->forras?->name],
-            ['col' => 'R', 'data' => $this->is_landbased],
-            ['col' => 'S', 'data' => $this->osszeg]
+            ['col' => 'P', 'data' => $this->jogcim?->sorrend],
+            ['col' => 'Q', 'data' => $this->alap?->name],
+            ['col' => 'R', 'data' => $this->forras?->name],
+            ['col' => 'S', 'data' => $this->is_landbased],
+            ['col' => 'T', 'data' => $this->osszeg]
         ];
     }
 
@@ -55,10 +56,11 @@ class TamogatasExcelResource extends JsonResource
             ['col' => 'M', 'data' => 'Tám. entitás ID'],
             ['col' => 'N', 'data' => 'Tám. entitás'],
             ['col' => 'O', 'data' => 'Jogcím'],
-            ['col' => 'P', 'data' => 'Alap'],
-            ['col' => 'Q', 'data' => 'Forrás'],
-            ['col' => 'R', 'data' => 'Föld. alapú'],
-            ['col' => 'S', 'data' => 'Összeg']
+            ['col' => 'P', 'data' => 'Jogcím sorrend'],
+            ['col' => 'Q', 'data' => 'Alap'],
+            ['col' => 'R', 'data' => 'Forrás'],
+            ['col' => 'S', 'data' => 'Föld. alapú'],
+            ['col' => 'T', 'data' => 'Összeg']
         ];
     }
 }

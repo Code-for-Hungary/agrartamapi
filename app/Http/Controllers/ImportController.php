@@ -124,15 +124,16 @@ class ImportController extends Controller
         return $tam;
     }
 
-    protected function getJogcim($name)
+    protected function getJogcim($name, $sorrend)
     {
         if (array_key_exists($name, $this->jogcimCache)) {
             return $this->jogcimCache[$name];
         }
         $jogcim = new Jogcim();
         $jogcim->name = $name;
+        $jogcim->sorrend = $sorrend;
         $jogcim->save();
-        $this->jogcimCache[$name] = $name;
+        $this->jogcimCache[$name] = $jogcim;
         return $jogcim;
     }
 
@@ -237,16 +238,17 @@ class ImportController extends Controller
                 }
 
                 $jogcim_name = $sheet->getCell('O' . $row)->getValue();
+                $jogcim_sorrend = $sheet->getCell('P' . $row)->getValue();
                 if (!$jogcim_name) {
                     $error[] = 'Nincs jogcím név megadva';
                 }
 
-                $alap_name = $sheet->getCell('P' . $row)->getValue();
+                $alap_name = $sheet->getCell('Q' . $row)->getValue();
                 if (!$alap_name) {
                     $error[] = 'Nincs alap név megadva';
                 }
 
-                $forras_name = $sheet->getCell('Q' . $row)->getValue();
+                $forras_name = $sheet->getCell('R' . $row)->getValue();
                 if (!$forras_name) {
                     $error[] = 'Nincs forrás név megadva';
                 }
@@ -259,6 +261,8 @@ class ImportController extends Controller
                 } else {
                     $tam = new Tamogatas();
                 }
+                $is_landbased = (boolean)$sheet->getCell('S' . $row)->getValue();
+                $osszeg = (int)$sheet->getCell('T' . $row)->getValue();
             }
 
             if ($error) {
@@ -270,7 +274,7 @@ class ImportController extends Controller
                         $sheet->getCell($head['col'] . $row)->getValue()
                     );
                 }
-                $errorsheet->setCellValue('T' . $errow, implode('; ', $error));
+                $errorsheet->setCellValue('U' . $errow, implode('; ', $error));
                 $errow++;
             } else {
                 $tam->ev = $ev;
@@ -283,11 +287,11 @@ class ImportController extends Controller
                 $tam->megye()->associate($megye);
                 $tam->cegcsoport()->associate($cegcsoport);
                 $tam->tamogatott()->associate($tamogatott);
-                $tam->jogcim()->associate($this->getJogcim($jogcim_name));
+                $tam->jogcim()->associate($this->getJogcim($jogcim_name, $jogcim_sorrend));
                 $tam->alap()->associate($this->getAlap($alap_name));
                 $tam->forras()->associate($this->getForras($forras_name));
-                $tam->is_landbased = (boolean)$sheet->getCell('R' . $row)->getValue();
-                $tam->osszeg = (int)$sheet->getCell('S' . $row)->getValue();
+                $tam->is_landbased = $is_landbased;
+                $tam->osszeg = $osszeg;
                 $tam->evesosszeg = 0;
                 $tam->point_lat = 0.0;
                 $tam->point_long = 0.0;

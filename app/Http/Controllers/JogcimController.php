@@ -50,7 +50,12 @@ class JogcimController extends Controller
      */
     public function index()
     {
-        return JogcimResource::collection(Jogcim::select()->orderBy('name', 'asc')->get());
+        return JogcimResource::collection(
+            Jogcim::select()
+                ->orderBy('sorrend', 'asc')
+                ->orderBy('name', 'asc')
+                ->get()
+        );
     }
 
 
