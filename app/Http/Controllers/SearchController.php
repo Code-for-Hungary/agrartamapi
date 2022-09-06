@@ -29,6 +29,15 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 class SearchController extends Controller
 {
 
+    protected function preprocessNameFilter($name)
+    {
+        $name = mb_ereg_replace('([()])', '', $name);
+        if (!mb_ereg('(["+\-~*()])', $name)) {
+            return '+' . mb_ereg_replace('([\s])', ' +', $name);;
+        }
+        return $name;
+    }
+
     /**
      * @param Request $request
      * @return \Illuminate\Database\Eloquent\Builder
@@ -44,8 +53,9 @@ class SearchController extends Controller
         if ($request->isfirm === '0' && $request->gender) {
             $q->where('gender', $request->gender);
         }
-        if ($request->nev) {
-            $q->whereFullText('name', $request->nev, ['mode' => 'boolean']);
+        $nev = $this->preprocessNameFilter($request->nev);
+        if ($nev) {
+            $q->whereFullText('name', $nev, ['mode' => 'boolean']);
         }
         if ($request->ev && is_array($request->ev)) {
             $q->whereIn('ev', $request->ev);
