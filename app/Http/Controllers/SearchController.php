@@ -35,9 +35,10 @@ class SearchController extends Controller
     {
         $name = mb_ereg_replace('([()])', '', $name);
         if (!mb_ereg('(["+\-~*()])', $name)) {
-            return '+' . mb_ereg_replace('([\s])', ' +', $name);;
+            $name = trim($name);
+            return '+' . mb_ereg_replace('([\s])', ' +', $name);
         }
-        return $name;
+        return trim($name);
     }
 
     /**
