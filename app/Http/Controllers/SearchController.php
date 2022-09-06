@@ -19,8 +19,10 @@ namespace App\Http\Controllers;
 use App\Http\Resources\CountResource;
 use App\Http\Resources\TamogatasExcelResource;
 use App\Http\Resources\TamogatasResourceCollection;
+use App\Models\Kereseslog;
 use App\Models\Tamogatas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -123,11 +125,31 @@ class SearchController extends Controller
      */
     public function index(Request $request)
     {
-        return new TamogatasResourceCollection($this->makeQuery($request)->paginate($request->per_page));
+        $log = Kereseslog::fromRequest($request, 'search');
+        DB::enableQueryLog();
+
+        $ret = new TamogatasResourceCollection($this->makeQuery($request)->paginate($request->per_page));
+
+        DB::disableQueryLog();
+        $sqllog = DB::getQueryLog();
+        DB::flushQueryLog();
+        if (array_key_exists(1, $sqllog)) {
+            $log->fillSqlAndSave($sqllog[1]);
+        }
+        return $ret;
     }
 
     public function count(Request $request) {
+        $log = Kereseslog::fromRequest($request, 'count');
+        DB::enableQueryLog();
+
         $ret = new CountResource($this->makeQuery($request)->count());
+
+        DB::disableQueryLog();
+        $sqllog = DB::getQueryLog();
+        DB::flushQueryLog();
+        $log->fillSqlAndSave($sqllog[0]);
+
         return $ret;
     }
 
@@ -145,6 +167,10 @@ class SearchController extends Controller
         }
 
         $sor = 2;
+
+        $log = Kereseslog::fromRequest($request, 'exportforedit');
+        DB::enableQueryLog();
+
         $this->makeQuery($request)->lazy()->each(function ($tam) use ($request, $sheet, &$sor) {
             $resource = new TamogatasExcelResource($tam);
             $res = $resource->toArray($request);
@@ -153,6 +179,12 @@ class SearchController extends Controller
             }
             $sor++;
         });
+
+        DB::disableQueryLog();
+        $sqllog = DB::getQueryLog();
+        DB::flushQueryLog();
+        $log->fillSqlAndSave($sqllog[0]);
+
         $excel->getActiveSheet()->getStyle('T1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
         $writer = IOFactory::createWriter($excel, 'Xlsx');
