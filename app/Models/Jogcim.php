@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Tamogatas[] $tamogatas
  * @property-read int|null $tamogatas_count
+ * @property int|null $sorrend
+ * @method static \Illuminate\Database\Eloquent\Builder|Jogcim whereSorrend($value)
  */
 class Jogcim extends Model
 {
