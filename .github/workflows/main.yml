@@ -1,0 +1,21 @@
+name: agrartamapi CD
+
+on:
+  push:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  normal_deploy:
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
+    steps:
+      - name: frissit.sh
+        uses: garygrossgarten/github-action-ssh@release
+        with:
+          command: |
+            ./agrarapifrissit.sh
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSHUSER }}
+          privateKey: ${{ secrets.SSHKULCS }}
