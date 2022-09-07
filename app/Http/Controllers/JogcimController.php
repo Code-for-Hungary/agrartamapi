@@ -24,6 +24,7 @@ class JogcimController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @return \Illuminate\Http\Response
      * @api {get} /jogcim Request Jogcím index
      * @apiSampleRequest off
      * @apiName GetJogcímIndex
@@ -46,7 +47,6 @@ class JogcimController extends Controller
      *          ]
      *      }
      *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
@@ -62,6 +62,8 @@ class JogcimController extends Controller
     /**
      * Display the specified resource.
      *
+     * @param \App\Models\Jogcim $jogcim
+     * @return \Illuminate\Http\Response
      * @api {get} /jogcims/:id Request jogcím information
      * @apiSampleRequest off
      * @apiName GetJogcím
@@ -69,8 +71,6 @@ class JogcimController extends Controller
      * @apiParam (url) {string} id Jogcím's unique id
      * @apiUse JogcimResponse
      *
-     * @param  \App\Models\Jogcim  $jogcim
-     * @return \Illuminate\Http\Response
      */
     public function show(Jogcim $jogcim)
     {

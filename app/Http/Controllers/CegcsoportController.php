@@ -24,6 +24,7 @@ class CegcsoportController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @return \Illuminate\Http\Response
      * @api {get} /cegcsoports Request Cégcsoport index
      * @apiSampleRequest off
      * @apiName GetCégcsoportIndex
@@ -46,7 +47,6 @@ class CegcsoportController extends Controller
      *          ]
      *      }
      *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
@@ -56,6 +56,8 @@ class CegcsoportController extends Controller
     /**
      * Display the specified resource.
      *
+     * @param \App\Models\Cegcsoport $cegcsoport
+     * @return \Illuminate\Http\Response
      * @api {get} /cegcsoports/:id Request cégcsoport information
      * @apiSampleRequest off
      * @apiName GetCégcsoport
@@ -63,8 +65,6 @@ class CegcsoportController extends Controller
      * @apiParam (url) {string} id Cégcsoport's unique id
      * @apiUse CegcsoportResponse
      *
-     * @param  \App\Models\Cegcsoport  $cegcsoport
-     * @return \Illuminate\Http\Response
      */
     public function show(Cegcsoport $cegcsoport)
     {

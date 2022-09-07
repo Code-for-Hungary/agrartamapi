@@ -52,115 +52,6 @@ class ImportController extends Controller
         }
     }
 
-    protected function fillCaches()
-    {
-        foreach (Jogcim::get() as $item) {
-            $this->jogcimCache[$item->name] = $item;
-        }
-        foreach (Alap::get() as $item) {
-            $this->alapCache[$item->name] = $item;
-        }
-        foreach (Forras::get() as $item) {
-            $this->forrasCache[$item->name] = $item;
-        }
-        foreach (Megye::get() as $item) {
-            $this->megyeCache['+' . $item->id] = $item;
-        }
-        foreach (Tamogatott::get() as $item) {
-            $this->tamogatottCache[$item->id] = $item;
-        }
-        foreach (Cegcsoport::get() as $item) {
-            $this->cegcsoportCache[$item->id] = $item;
-        }
-    }
-
-    /**
-     * @param $id
-     * @return false|Megye
-     */
-    protected function getMegye($id)
-    {
-        if (array_key_exists('+' . $id, $this->megyeCache)) {
-            return $this->megyeCache['+' . $id];
-        }
-        return null;
-    }
-
-    protected function getCegcsoport($id, $name)
-    {
-        if (!$id) {
-            return null;
-        }
-        if (array_key_exists($id, $this->cegcsoportCache)) {
-            return $this->cegcsoportCache[$id];
-        }
-        if (!$name) {
-            return false;
-        }
-        $cegcs = new Cegcsoport();
-        $cegcs->id = $id;
-        $cegcs->name = $name;
-        $cegcs->save();
-        $this->cegcsoportCache[$id] = $cegcs;
-        return $cegcs;
-    }
-
-    protected function getTamogatott($id, $name)
-    {
-        if (!$id) {
-            return null;
-        }
-        if (array_key_exists($id, $this->tamogatottCache)) {
-            return $this->tamogatottCache[$id];
-        }
-        if (!$name) {
-            return false;
-        }
-        $tam = new Tamogatott();
-        $tam->id = $id;
-        $tam->name = $name;
-        $tam->save();
-        $this->tamogatottCache[$id] = $tam;
-        return $tam;
-    }
-
-    protected function getJogcim($name, $sorrend)
-    {
-        if (array_key_exists($name, $this->jogcimCache)) {
-            return $this->jogcimCache[$name];
-        }
-        $jogcim = new Jogcim();
-        $jogcim->name = $name;
-        $jogcim->sorrend = $sorrend;
-        $jogcim->save();
-        $this->jogcimCache[$name] = $jogcim;
-        return $jogcim;
-    }
-
-    protected function getAlap($name)
-    {
-        if (array_key_exists($name, $this->alapCache)) {
-            return $this->alapCache[$name];
-        }
-        $alap = new Alap();
-        $alap->name = $name;
-        $alap->save();
-        $this->alapCache[$name] = $alap;
-        return $alap;
-    }
-
-    protected function getForras($name)
-    {
-        if (array_key_exists($name, $this->forrasCache)) {
-            return $this->forrasCache[$name];
-        }
-        $forras = new Forras();
-        $forras->name = $name;
-        $forras->save();
-        $this->forrasCache[$name] = $forras;
-        return $forras;
-    }
-
     protected function import($filepath)
     {
         $valtozottak = [];
@@ -320,10 +211,118 @@ class ImportController extends Controller
         return false;
     }
 
+    protected function fillCaches()
+    {
+        foreach (Jogcim::get() as $item) {
+            $this->jogcimCache[$item->name] = $item;
+        }
+        foreach (Alap::get() as $item) {
+            $this->alapCache[$item->name] = $item;
+        }
+        foreach (Forras::get() as $item) {
+            $this->forrasCache[$item->name] = $item;
+        }
+        foreach (Megye::get() as $item) {
+            $this->megyeCache['+' . $item->id] = $item;
+        }
+        foreach (Tamogatott::get() as $item) {
+            $this->tamogatottCache[$item->id] = $item;
+        }
+        foreach (Cegcsoport::get() as $item) {
+            $this->cegcsoportCache[$item->id] = $item;
+        }
+    }
+
+    /**
+     * @param $id
+     * @return false|Megye
+     */
+    protected function getMegye($id)
+    {
+        if (array_key_exists('+' . $id, $this->megyeCache)) {
+            return $this->megyeCache['+' . $id];
+        }
+        return null;
+    }
+
+    protected function getCegcsoport($id, $name)
+    {
+        if (!$id) {
+            return null;
+        }
+        if (array_key_exists($id, $this->cegcsoportCache)) {
+            return $this->cegcsoportCache[$id];
+        }
+        if (!$name) {
+            return false;
+        }
+        $cegcs = new Cegcsoport();
+        $cegcs->id = $id;
+        $cegcs->name = $name;
+        $cegcs->save();
+        $this->cegcsoportCache[$id] = $cegcs;
+        return $cegcs;
+    }
+
+    protected function getTamogatott($id, $name)
+    {
+        if (!$id) {
+            return null;
+        }
+        if (array_key_exists($id, $this->tamogatottCache)) {
+            return $this->tamogatottCache[$id];
+        }
+        if (!$name) {
+            return false;
+        }
+        $tam = new Tamogatott();
+        $tam->id = $id;
+        $tam->name = $name;
+        $tam->save();
+        $this->tamogatottCache[$id] = $tam;
+        return $tam;
+    }
+
+    protected function getJogcim($name, $sorrend)
+    {
+        if (array_key_exists($name, $this->jogcimCache)) {
+            return $this->jogcimCache[$name];
+        }
+        $jogcim = new Jogcim();
+        $jogcim->name = $name;
+        $jogcim->sorrend = $sorrend;
+        $jogcim->save();
+        $this->jogcimCache[$name] = $jogcim;
+        return $jogcim;
+    }
+
+    protected function getAlap($name)
+    {
+        if (array_key_exists($name, $this->alapCache)) {
+            return $this->alapCache[$name];
+        }
+        $alap = new Alap();
+        $alap->name = $name;
+        $alap->save();
+        $this->alapCache[$name] = $alap;
+        return $alap;
+    }
+
+    protected function getForras($name)
+    {
+        if (array_key_exists($name, $this->forrasCache)) {
+            return $this->forrasCache[$name];
+        }
+        $forras = new Forras();
+        $forras->name = $name;
+        $forras->save();
+        $this->forrasCache[$name] = $forras;
+        return $forras;
+    }
+
     private function recalcEvesosszeg($valtozottak)
     {
         foreach ($valtozottak as $item) {
-
             DB::beginTransaction();
 
             $evesosszeg = Tamogatas::where('ev', $item['ev'])

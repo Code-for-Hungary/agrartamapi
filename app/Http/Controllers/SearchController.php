@@ -31,21 +31,49 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 class SearchController extends Controller
 {
 
-    protected function preprocessNameFilter($name)
+    /**
+     * Display a listing of the resource.
+     *
+     * @api {get} /search Request
+     * @apiSampleRequest off
+     * @apiName Get
+     * @apiGroup
+     * @apiSuccess {Object[]} data List of
+     * @apiSuccess {string}
+     * @apiSuccessExample {json} Success-Response:
+     *      HTTP/1.1 200 OK
+     *      {
+     *          "data": [
+     *              {
+     *              },
+     *              {
+     *              }
+     *          ]
+     *      }
+     *
+     */
+    public function index(Request $request)
     {
-        $name = mb_ereg_replace('([()])', '', $name);
-        if (!mb_ereg('(["+\-~*()])', $name)) {
-            $name = trim($name);
-            return '+' . mb_ereg_replace('([\s])', ' +', $name);
+        $log = Kereseslog::fromRequest($request, 'search');
+        DB::enableQueryLog();
+
+        $ret = new TamogatasResourceCollection($this->makeQuery($request)->paginate($request->per_page));
+
+        DB::disableQueryLog();
+        $sqllog = DB::getQueryLog();
+        DB::flushQueryLog();
+        if (array_key_exists(1, $sqllog)) {
+            $log->fillSqlAndSave($sqllog[1]);
         }
-        return trim($name);
+        return $ret;
     }
 
     /**
      * @param Request $request
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function makeQuery(Request $request) {
+    protected function makeQuery(Request $request)
+    {
         $q = Tamogatas::with(['megye', 'cegcsoport', 'tamogatott', 'jogcim', 'alap', 'forras']);
 
         // ha cég nem 'mindegy'
@@ -103,44 +131,18 @@ class SearchController extends Controller
         return $q;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @api {get} /search Request
-     * @apiSampleRequest off
-     * @apiName Get
-     * @apiGroup
-     * @apiSuccess {Object[]} data List of
-     * @apiSuccess {string}
-     * @apiSuccessExample {json} Success-Response:
-     *      HTTP/1.1 200 OK
-     *      {
-     *          "data": [
-     *              {
-     *              },
-     *              {
-     *              }
-     *          ]
-     *      }
-     *
-     */
-    public function index(Request $request)
+    protected function preprocessNameFilter($name)
     {
-        $log = Kereseslog::fromRequest($request, 'search');
-        DB::enableQueryLog();
-
-        $ret = new TamogatasResourceCollection($this->makeQuery($request)->paginate($request->per_page));
-
-        DB::disableQueryLog();
-        $sqllog = DB::getQueryLog();
-        DB::flushQueryLog();
-        if (array_key_exists(1, $sqllog)) {
-            $log->fillSqlAndSave($sqllog[1]);
+        $name = mb_ereg_replace('([()])', '', $name);
+        if (!mb_ereg('(["+\-~*()])', $name)) {
+            $name = trim($name);
+            return '+' . mb_ereg_replace('([\s])', ' +', $name);
         }
-        return $ret;
+        return trim($name);
     }
 
-    public function count(Request $request) {
+    public function count(Request $request)
+    {
         $log = Kereseslog::fromRequest($request, 'count');
         DB::enableQueryLog();
 
@@ -154,7 +156,8 @@ class SearchController extends Controller
         return $ret;
     }
 
-    public function exportforedit(Request $request) {
+    public function exportforedit(Request $request)
+    {
         $excel = new Spreadsheet();
 
         $excel->getProperties()

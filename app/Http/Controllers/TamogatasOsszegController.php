@@ -10,7 +10,7 @@ class TamogatasOsszegController extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
      */
     public function __invoke(Request $request)
@@ -18,10 +18,10 @@ class TamogatasOsszegController extends Controller
         $min = Tamogatas::min('osszeg') / 1000;
         $max = Tamogatas::max('osszeg') / 1000;
         return response()->json([
-            'data' => [
-                'min' => $min,
-                'max' => $max
-            ]
-        ]);
+                                    'data' => [
+                                        'min' => $min,
+                                        'max' => $max
+                                    ]
+                                ]);
     }
 }

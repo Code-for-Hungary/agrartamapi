@@ -24,6 +24,7 @@ class MegyeController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @return \Illuminate\Http\Response
      * @api {get} /megyes Request Megye index
      * @apiSampleRequest off
      * @apiName GetMegyeIndex
@@ -46,7 +47,6 @@ class MegyeController extends Controller
      *          ]
      *      }
      *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
@@ -56,15 +56,14 @@ class MegyeController extends Controller
     /**
      * Display the specified resource.
      *
+     * @param \App\Models\Megye $megye
+     * @return \Illuminate\Http\Response
      * @api {get} /megyes/:id Request megye information
      * @apiSampleRequest off
      * @apiName GetMegye
      * @apiGroup Megye
      * @apiParam (url) {string} id Megye's unique id
      * @apiUse MegyeResponse
-
-     * @param  \App\Models\Megye  $megye
-     * @return \Illuminate\Http\Response
      */
     public function show(Megye $megye)
     {

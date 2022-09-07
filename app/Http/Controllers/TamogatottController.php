@@ -24,6 +24,7 @@ class TamogatottController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @return \Illuminate\Http\Response
      * @api {get} /tamogatotts Request Támogatott index
      * @apiSampleRequest off
      * @apiName GetTámogatottIndex
@@ -46,7 +47,6 @@ class TamogatottController extends Controller
      *          ]
      *      }
      *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
@@ -56,6 +56,8 @@ class TamogatottController extends Controller
     /**
      * Display the specified resource.
      *
+     * @param \App\Models\Tamogatott $tamogatott
+     * @return \Illuminate\Http\Response
      * @api {get} /tamogatotts/:id Request támogatott information
      * @apiSampleRequest off
      * @apiName GetTámogatott
@@ -63,8 +65,6 @@ class TamogatottController extends Controller
      * @apiParam (url) {string} id Támogatott's unique id
      * @apiUse TamogatottResponse
      *
-     * @param  \App\Models\Tamogatott  $tamogatott
-     * @return \Illuminate\Http\Response
      */
     public function show(Tamogatott $tamogatott)
     {

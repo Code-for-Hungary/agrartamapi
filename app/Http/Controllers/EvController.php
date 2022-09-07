@@ -27,6 +27,7 @@ class EvController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @return \Illuminate\Http\Response
      * @api {get} /evs Request Év index
      * @apiSampleRequest off
      * @apiName GetÉvIndex
@@ -46,7 +47,6 @@ class EvController extends Controller
      *          ]
      *      }
      *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {

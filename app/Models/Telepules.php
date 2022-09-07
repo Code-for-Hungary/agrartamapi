@@ -32,7 +32,8 @@ class Telepules extends Model
 
     protected $hidden = ['created_at', 'updated_at'];
 
-    public function megye() {
+    public function megye()
+    {
         return $this->belongsTo(Megye::class, 'megye_id');
     }
 

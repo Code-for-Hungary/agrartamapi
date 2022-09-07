@@ -31,7 +31,8 @@ class Megye extends Model
     protected $keyType = 'string';
     protected $hidden = ['created_at', 'updated_at'];
 
-    public function tamogatas() {
+    public function tamogatas()
+    {
         return $this->hasMany(Tamogatas::class);
     }
 }

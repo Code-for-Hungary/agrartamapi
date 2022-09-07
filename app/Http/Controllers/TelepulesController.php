@@ -21,7 +21,7 @@ class TelepulesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Telepules  $telepules
+     * @param \App\Models\Telepules $telepules
      * @return \Illuminate\Http\Response
      */
     public function show(Telepules $telepules)

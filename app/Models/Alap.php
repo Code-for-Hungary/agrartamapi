@@ -29,7 +29,8 @@ class Alap extends Model
 
     protected $hidden = ['created_at', 'updated_at'];
 
-    public function tamogatas() {
+    public function tamogatas()
+    {
         return $this->hasMany(Tamogatas::class);
     }
 }

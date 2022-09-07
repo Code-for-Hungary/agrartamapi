@@ -6,6 +6,32 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class TamogatasExcelResource extends JsonResource
 {
+    public static function getHeader()
+    {
+        return [
+            ['col' => 'A', 'data' => 'ID'],
+            ['col' => 'B', 'data' => 'Év'],
+            ['col' => 'C', 'data' => 'Nyertes neve'],
+            ['col' => 'D', 'data' => 'Gender'],
+            ['col' => 'E', 'data' => 'Jogi személy'],
+            ['col' => 'F', 'data' => 'Ir.szám'],
+            ['col' => 'G', 'data' => 'Város'],
+            ['col' => 'H', 'data' => 'Utca'],
+            ['col' => 'I', 'data' => 'Megye ID'],
+            ['col' => 'J', 'data' => 'Megye'],
+            ['col' => 'K', 'data' => 'Cégcsoport ID'],
+            ['col' => 'L', 'data' => 'Cégcsoport'],
+            ['col' => 'M', 'data' => 'Tám. entitás ID'],
+            ['col' => 'N', 'data' => 'Tám. entitás'],
+            ['col' => 'O', 'data' => 'Jogcím'],
+            ['col' => 'P', 'data' => 'Jogcím sorrend'],
+            ['col' => 'Q', 'data' => 'Alap'],
+            ['col' => 'R', 'data' => 'Forrás'],
+            ['col' => 'S', 'data' => 'Föld. alapú'],
+            ['col' => 'T', 'data' => 'Összeg']
+        ];
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -35,32 +61,6 @@ class TamogatasExcelResource extends JsonResource
             ['col' => 'R', 'data' => $this->forras?->name],
             ['col' => 'S', 'data' => $this->is_landbased],
             ['col' => 'T', 'data' => $this->osszeg]
-        ];
-    }
-
-    public static function getHeader()
-    {
-        return [
-            ['col' => 'A', 'data' => 'ID'],
-            ['col' => 'B', 'data' => 'Év'],
-            ['col' => 'C', 'data' => 'Nyertes neve'],
-            ['col' => 'D', 'data' => 'Gender'],
-            ['col' => 'E', 'data' => 'Jogi személy'],
-            ['col' => 'F', 'data' => 'Ir.szám'],
-            ['col' => 'G', 'data' => 'Város'],
-            ['col' => 'H', 'data' => 'Utca'],
-            ['col' => 'I', 'data' => 'Megye ID'],
-            ['col' => 'J', 'data' => 'Megye'],
-            ['col' => 'K', 'data' => 'Cégcsoport ID'],
-            ['col' => 'L', 'data' => 'Cégcsoport'],
-            ['col' => 'M', 'data' => 'Tám. entitás ID'],
-            ['col' => 'N', 'data' => 'Tám. entitás'],
-            ['col' => 'O', 'data' => 'Jogcím'],
-            ['col' => 'P', 'data' => 'Jogcím sorrend'],
-            ['col' => 'Q', 'data' => 'Alap'],
-            ['col' => 'R', 'data' => 'Forrás'],
-            ['col' => 'S', 'data' => 'Föld. alapú'],
-            ['col' => 'T', 'data' => 'Összeg']
         ];
     }
 }

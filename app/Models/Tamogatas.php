@@ -66,30 +66,49 @@ use Illuminate\Database\Eloquent\Model;
 class Tamogatas extends Model
 {
     use HasFactory;
-    protected $fillable = ['ev', 'name', 'irszam', 'varos', 'utca', 'osszeg', 'evesosszeg',
-        'is_firm', 'is_landbased', 'gender', 'point_lat', 'point_long'];
 
-    public function cegcsoport() {
+    protected $fillable = [
+        'ev',
+        'name',
+        'irszam',
+        'varos',
+        'utca',
+        'osszeg',
+        'evesosszeg',
+        'is_firm',
+        'is_landbased',
+        'gender',
+        'point_lat',
+        'point_long'
+    ];
+
+    public function cegcsoport()
+    {
         return $this->belongsTo(Cegcsoport::class, 'cegcsoport_id');
     }
 
-    public function tamogatott() {
+    public function tamogatott()
+    {
         return $this->belongsTo(Tamogatott::class, 'tamogatott_id');
     }
 
-    public function jogcim() {
+    public function jogcim()
+    {
         return $this->belongsTo(Jogcim::class, 'jogcim_id');
     }
 
-    public function alap() {
+    public function alap()
+    {
         return $this->belongsTo(Alap::class, 'alap_id');
     }
 
-    public function forras() {
+    public function forras()
+    {
         return $this->belongsTo(Forras::class, 'forras_id');
     }
 
-    public function megye() {
+    public function megye()
+    {
         return $this->belongsTo(Megye::class, 'megye_id');
     }
 }

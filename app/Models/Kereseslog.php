@@ -49,14 +49,17 @@ class Kereseslog extends Model
         $o->ip_address = $request->ip();
         $o->url = $request->fullUrl();
         $o->endpoint = $endpoint;
+
         $par = $request->all();
+        unset($par['page']);
         if (array_key_exists('per_page', $par)) {
             $o->per_page = $par['per_page'];
             unset($par['per_page']);
         }
-        unset($par['page']);
+
         $o->queryparameter = json_encode($par);
         $o->save();
+
         return $o;
     }
 

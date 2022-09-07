@@ -24,6 +24,7 @@ class AlapController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @return \Illuminate\Http\Response
      * @api {get} /alaps Request Alap index
      * @apiSampleRequest off
      * @apiName GetAlapIndex
@@ -46,7 +47,6 @@ class AlapController extends Controller
      *          ]
      *      }
      *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
@@ -56,6 +56,8 @@ class AlapController extends Controller
     /**
      * Display the specified resource.
      *
+     * @param \App\Models\Alap $alap
+     * @return \Illuminate\Http\Response
      * @api {get} /alaps/:id Request alap information
      * @apiSampleRequest off
      * @apiName GetAlap
@@ -63,8 +65,6 @@ class AlapController extends Controller
      * @apiParam (url) {string} id Alap's unique id
      * @apiUse AlapResponse
      *
-     * @param  \App\Models\Alap  $alap
-     * @return \Illuminate\Http\Response
      */
     public function show(Alap $alap)
     {

@@ -24,6 +24,7 @@ class ForrasController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @return \Illuminate\Http\Response
      * @api {get} /forras Request Forrás index
      * @apiSampleRequest off
      * @apiName GetForrásIndex
@@ -46,7 +47,6 @@ class ForrasController extends Controller
      *          ]
      *      }
      *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
@@ -56,6 +56,8 @@ class ForrasController extends Controller
     /**
      * Display the specified resource.
      *
+     * @param \App\Models\Forras $forras
+     * @return \Illuminate\Http\Response
      * @api {get} /forras/:id Request forrás information
      * @apiSampleRequest off
      * @apiName GetForrás
@@ -63,8 +65,6 @@ class ForrasController extends Controller
      * @apiParam (url) {string} id Forrás's unique id
      * @apiUse ForrasResponse
      *
-     * @param  \App\Models\Forras  $forras
-     * @return \Illuminate\Http\Response
      */
     public function show(Forras $forras)
     {
