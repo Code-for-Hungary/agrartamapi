@@ -133,12 +133,14 @@ class SearchController extends Controller
 
     protected function preprocessNameFilter($name)
     {
-        $name = mb_ereg_replace('([()])', '', $name);
-        if (!mb_ereg('(["+\-~*()])', $name)) {
-            $name = trim($name);
-            return '+' . mb_ereg_replace('([\s])', ' +', $name);
+        $name = trim(mb_ereg_replace('([()])', '', $name));
+        if ($name) {
+            if (!mb_ereg('(["+\-~*])', $name)) {
+                return '+' . mb_ereg_replace('([\s])', ' +', $name);
+            }
+            return $name;
         }
-        return trim($name);
+        return null;
     }
 
     public function count(Request $request)
