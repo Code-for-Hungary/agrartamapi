@@ -15,8 +15,8 @@ class EvesTamogatasOsszegController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $min = Tamogatas::min('evesosszeg') / 1000;
-        $max = Tamogatas::max('evesosszeg') / 1000;
+        $min = Tamogatas::min('evesosszeg');
+        $max = Tamogatas::max('evesosszeg');
         return response()->json([
                                     'data' => [
                                         'min' => $min,
