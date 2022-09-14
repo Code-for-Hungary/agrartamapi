@@ -67,7 +67,7 @@ class ImportController extends Controller
 
         $in = IOFactory::load($filepath);
         $sheet = $in->setActiveSheetIndex(0);
-        $maxrow = $sheet->getHighestDataRow('S');
+        $maxrow = $sheet->getHighestDataRow('T');
         for ($row = 2; $row <= $maxrow; ++$row) {
             $error = [];
 
