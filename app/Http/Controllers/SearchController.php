@@ -74,7 +74,7 @@ class SearchController extends Controller
      */
     protected function makeQuery(Request $request)
     {
-        $q = Tamogatas::with(['megye', 'cegcsoport', 'tamogatott', 'jogcim', 'alap', 'forras']);
+        $q = Tamogatas::with(['megye', 'cegcsoport', 'tamogatott', 'jogcim', 'alap', 'forras', 'telepules']);
 
         // ha cég nem 'mindegy'
         if ($request->isfirm === '0' || $request->isfirm === '1') {
@@ -91,14 +91,11 @@ class SearchController extends Controller
         if ($request->ev && is_array($request->ev)) {
             $q->whereIn('ev', $request->ev);
         }
-        if ($request->irszam) {
-            $q->where('irszam', 'like', $request->irszam);
-        }
-        if ($request->varos) {
-            $q->where('varos', 'like', $request->varos);
-        }
         if ($request->megye) {
             $q->where('megye_id', $request->megye);
+        }
+        if ($request->telepules && is_array($request->telepules)) {
+            $q->whereIn('telepules_id', $request->telepules);
         }
         if ($request->jogcim && is_array($request->jogcim)) {
             $q->whereIn('jogcim_id', $request->jogcim);

@@ -10,6 +10,7 @@ use App\Models\Jogcim;
 use App\Models\Megye;
 use App\Models\Tamogatas;
 use App\Models\Tamogatott;
+use App\Models\Telepules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -25,6 +26,7 @@ class ImportController extends Controller
     private $megyeCache = [];
     private $tamogatottCache = [];
     private $cegcsoportCache = [];
+    private $telepulesCache = [];
 
     /**
      * Handle the incoming request.
@@ -114,6 +116,8 @@ class ImportController extends Controller
                 $megye_id = $sheet->getCell('I' . $row)->getValue();
                 $megye = $this->getMegye($megye_id);
 
+                $telepules = $this->getTelepules($irszam, $varos);
+
                 $cegcsoport_id = $sheet->getCell('K' . $row)->getValue();
                 $cegcsoport_name = $sheet->getCell('L' . $row)->getValue();
                 $cegcsoport = $this->getCegcsoport($cegcsoport_id, $cegcsoport_name);
@@ -172,8 +176,8 @@ class ImportController extends Controller
                 $tam->name = $nev;
                 $tam->gender = $gender;
                 $tam->is_firm = $is_firm;
-                $tam->irszam = $irszam;
-                $tam->varos = $varos;
+                $tam->irszam = '';
+                $tam->varos = '';
                 $tam->utca = $utca;
                 $tam->megye()->associate($megye);
                 $tam->cegcsoport()->associate($cegcsoport);
@@ -181,6 +185,7 @@ class ImportController extends Controller
                 $tam->jogcim()->associate($this->getJogcim($jogcim_name, $jogcim_sorrend));
                 $tam->alap()->associate($this->getAlap($alap_name));
                 $tam->forras()->associate($this->getForras($forras_name));
+                $tam->telepules()->associate($telepules);
                 $tam->is_landbased = $is_landbased;
                 $tam->osszeg = $osszeg;
                 $tam->evesosszeg = 0;
@@ -188,11 +193,10 @@ class ImportController extends Controller
                 $tam->point_long = 0.0;
                 $tam->save();
 
-                $valtozottak[(string)$ev . $nev . $irszam . $varos . $utca] = [
+                $valtozottak[(string)$ev . $nev . $telepules->id . $utca] = [
                     'ev' => $ev,
                     'nev' => $nev,
-                    'irszam' => $irszam,
-                    'varos' => $varos,
+                    'telepules' => $telepules->id,
                     'utca' => $utca
                 ];
                 DB::commit();
@@ -230,6 +234,9 @@ class ImportController extends Controller
         }
         foreach (Cegcsoport::get() as $item) {
             $this->cegcsoportCache[$item->id] = $item;
+        }
+        foreach (Telepules::get() as $item) {
+            $this->telepulesCache[$item->irszam . $item->name] = $item;
         }
     }
 
@@ -320,6 +327,20 @@ class ImportController extends Controller
         return $forras;
     }
 
+    protected function getTelepules($irszam, $name)
+    {
+        $kulcs = $irszam . $name;
+        if (array_key_exists($kulcs, $this->telepulesCache)) {
+            return $this->telepulesCache[$kulcs];
+        }
+        $telepules = new Telepules();
+        $telepules->irszam = $irszam;
+        $telepules->name = $name;
+        $telepules->save();
+        $this->telepulesCache[$kulcs] = $telepules;
+        return $telepules;
+    }
+
     private function recalcEvesosszeg($valtozottak)
     {
         foreach ($valtozottak as $item) {
@@ -327,16 +348,14 @@ class ImportController extends Controller
 
             $evesosszeg = Tamogatas::where('ev', $item['ev'])
                 ->where('name', $item['nev'])
-                ->where('irszam', $item['irszam'])
-                ->where('varos', $item['varos'])
+                ->where('telepules_id', $item['telepules'])
                 ->where('utca', $item['utca'])
                 ->sum('osszeg');
 
             $sorok = Tamogatas::select()
                 ->where('ev', $item['ev'])
                 ->where('name', $item['nev'])
-                ->where('irszam', $item['irszam'])
-                ->where('varos', $item['varos'])
+                ->where('telepules_id', $item['telepules'])
                 ->where('utca', $item['utca'])
                 ->get();
             foreach ($sorok as $sor) {

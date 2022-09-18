@@ -62,6 +62,8 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property int $forrasadat_id
  * @method static \Illuminate\Database\Eloquent\Builder|Tamogatas whereForrasadatId($value)
+ * @property int|null $telepules_id
+ * @method static \Illuminate\Database\Eloquent\Builder|Tamogatas whereTelepulesId($value)
  */
 class Tamogatas extends Model
 {
@@ -110,5 +112,10 @@ class Tamogatas extends Model
     public function megye()
     {
         return $this->belongsTo(Megye::class, 'megye_id');
+    }
+
+    public function telepules()
+    {
+        return $this->belongsTo(Telepules::class, 'telepules_id');
     }
 }

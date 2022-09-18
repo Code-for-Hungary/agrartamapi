@@ -33,7 +33,8 @@ class TamogatasResource extends JsonResource
             'tamogatott' => $this->whenLoaded('tamogatott'),
             'jogcim' => $this->whenLoaded('jogcim'),
             'alap' => $this->whenLoaded('alap'),
-            'forras' => $this->whenLoaded('forras')
+            'forras' => $this->whenLoaded('forras'),
+            'telepules' => $this->whenLoaded('telepules')
         ];
     }
 }
