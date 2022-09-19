@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\TamogatasExcelResource;
 use App\Models\Alap;
 use App\Models\Cegcsoport;
 use App\Models\Forras;
