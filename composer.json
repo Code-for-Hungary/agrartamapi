@@ -11,6 +11,7 @@
         "laravel/framework": "^9.2",
         "laravel/sanctum": "^2.14.1",
         "laravel/tinker": "^2.7",
+        "openspout/openspout": "^4.7",
         "phpoffice/phpspreadsheet": "^1.24"
     },
     "require-dev": {
