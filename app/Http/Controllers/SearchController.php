@@ -24,9 +24,8 @@ use App\Models\Tamogatas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Writer\XLSX\Writer;
 
 class SearchController extends Controller
 {
@@ -157,30 +156,29 @@ class SearchController extends Controller
 
     public function exportforedit(Request $request)
     {
-        $excel = new Spreadsheet();
 
-        $excel->getProperties()
-            ->setCreator('K-Monitor Agrártámogatás projekt')
-            ->setTitle('Agrártámogatás adatbázis részlet')
-            ->setDescription('Agrártámogatás adatbázis részlet');
+        $writer = new Writer();
+        $filename = 'agrar_' . Str::uuid() . '.xlsx';
+        $pathfilename = public_path('storage/') . $filename;
+        $writer->openToFile($pathfilename);
 
-        $sheet = $excel->setActiveSheetIndex(0);
+        $cellvalues = [];
         foreach (TamogatasExcelResource::getHeader() as $head) {
-            $sheet->setCellValue($head['col'] . '1', $head['data']);
+            $cellvalues[] = $head['data'];
         }
-
-        $sor = 2;
+        $writer->addRow(Row::fromValues($cellvalues));
 
         $log = Kereseslog::fromRequest($request, 'exportforedit');
         DB::enableQueryLog();
 
-        $this->makeQuery($request)->lazy()->each(function ($tam) use ($request, $sheet, &$sor) {
+        $this->makeQuery($request)->lazy()->each(function ($tam) use ($request, $writer) {
             $resource = new TamogatasExcelResource($tam);
             $res = $resource->toArray($request);
+            $cellvalues = [];
             foreach ($res as $item) {
-                $sheet->setCellValue($item['col'] . $sor, $item['data']);
+                $cellvalues[] = $item['data'];
             }
-            $sor++;
+            $writer->addRow(Row::fromValues($cellvalues));
         });
 
         DB::disableQueryLog();
@@ -188,13 +186,7 @@ class SearchController extends Controller
         DB::flushQueryLog();
         $log->fillSqlAndSave($sqllog[0]);
 
-        $excel->getActiveSheet()->getStyle('T1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-        $writer = IOFactory::createWriter($excel, 'Xlsx');
-        $filename = 'agrar_' . Str::uuid() . '.xlsx';
-        $pathfilename = public_path('storage/') . $filename;
-        $writer->save($pathfilename);
-
+        $writer->close();
         return [
             'data' => asset('storage/' . $filename, true)
         ];
