@@ -47,6 +47,10 @@ class ImportController extends Controller
                     $file->getClientOriginalName()
                 );
 
+                if (env('IMPORT_REMOVE_UPLOAD', false)) {
+                    @\unlink(Storage::path($path));
+                }
+
                 if ($ret['isError']) {
                     return redirect($ret['value']);
                 }
