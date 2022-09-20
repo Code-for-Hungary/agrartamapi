@@ -172,7 +172,7 @@ class SearchController extends Controller
         $log = Kereseslog::fromRequest($request, 'exportforedit');
         DB::enableQueryLog();
 
-        $this->makeQuery($request)->lazy()->each(function ($tam) use ($request, $writer) {
+        $this->makeQuery($request)->lazy(env('EXPORT_CHUNK_SIZE', 10000))->each(function ($tam) use ($request, $writer) {
             $resource = new TamogatasExcelResource($tam);
             $res = $resource->toArray($request);
             $cellvalues = [];
@@ -182,12 +182,13 @@ class SearchController extends Controller
             $writer->addRow(Row::fromValues($cellvalues));
         });
 
+        $writer->close();
+
         DB::disableQueryLog();
         $sqllog = DB::getQueryLog();
         DB::flushQueryLog();
         $log->fillSqlAndSave($sqllog[0]);
 
-        $writer->close();
         return [
             'data' => asset('storage/' . $filename['filename'], true)
         ];
