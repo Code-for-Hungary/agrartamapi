@@ -10,6 +10,7 @@ use App\Models\Megye;
 use App\Models\Tamogatas;
 use App\Models\Tamogatott;
 use App\Models\Telepules;
+use App\Traits\FileNameTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,6 +22,8 @@ use OpenSpout\Writer\XLSX\Writer;
 
 class ImportController extends Controller
 {
+    use FileNameTrait;
+
     private $jogcimCache = [];
     private $alapCache = [];
     private $forrasCache = [];
@@ -70,9 +73,8 @@ class ImportController extends Controller
         }
 
         $writer = new Writer();
-        $outfilename = 'agrar_' . Str::uuid() . '.xlsx';
-        $pathfilename = public_path('storage/') . $outfilename;
-        $writer->openToFile($pathfilename);
+        $outfilename = $this->getFileName();
+        $writer->openToFile($outfilename['fullfilename']);
 
         $valtozottak = [];
 
@@ -158,7 +160,7 @@ class ImportController extends Controller
             if ($waserror) {
                 return [
                     'isError' => true,
-                    'value' => asset('storage/' . $outfilename, true)
+                    'value' => asset('storage/' . $outfilename['filename'], true)
                     ];
             }
             return [

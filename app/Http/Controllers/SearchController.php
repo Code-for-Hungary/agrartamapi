@@ -21,14 +21,16 @@ use App\Http\Resources\TamogatasExcelResource;
 use App\Http\Resources\TamogatasResourceCollection;
 use App\Models\Kereseslog;
 use App\Models\Tamogatas;
+use App\Traits\FileNameTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Writer\XLSX\Writer;
 
 class SearchController extends Controller
 {
+
+    use FileNameTrait;
 
     /**
      * Display a listing of the resource.
@@ -158,9 +160,8 @@ class SearchController extends Controller
     {
 
         $writer = new Writer();
-        $filename = 'agrar_' . Str::uuid() . '.xlsx';
-        $pathfilename = public_path('storage/') . $filename;
-        $writer->openToFile($pathfilename);
+        $filename = $this->getFileName();
+        $writer->openToFile($filename['fullfilename']);
 
         $cellvalues = [];
         foreach (TamogatasExcelResource::getHeader() as $head) {
@@ -188,7 +189,7 @@ class SearchController extends Controller
 
         $writer->close();
         return [
-            'data' => asset('storage/' . $filename, true)
+            'data' => asset('storage/' . $filename['filename'], true)
         ];
     }
 }
