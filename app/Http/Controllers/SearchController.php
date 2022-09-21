@@ -24,6 +24,7 @@ use App\Models\Tamogatas;
 use App\Traits\FileNameTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Writer\XLSX\Writer;
 
@@ -161,6 +162,9 @@ class SearchController extends Controller
 
         $writer = new Writer();
         $filename = $this->getFileName();
+
+        Log::channel('agrarexport')->debug($filename['fullfilename']);
+
         $writer->openToFile($filename['fullfilename']);
 
         $cellvalues = [];
@@ -171,6 +175,8 @@ class SearchController extends Controller
 
         $log = Kereseslog::fromRequest($request, 'exportforedit');
         DB::enableQueryLog();
+
+        Log::channel('agrarexport')->debug('lazyById started, chunk size: ' . env('EXPORT_CHUNK_SIZE', 10000));
 
         $this->makeQuery($request)->lazyById(env('EXPORT_CHUNK_SIZE', 10000), 'id')
             ->each(function ($tam) use ($request, $writer) {
@@ -183,7 +189,9 @@ class SearchController extends Controller
             $writer->addRow(Row::fromValues($cellvalues));
         });
 
+        Log::channel('agrarexport')->debug('writer->close started');
         $writer->close();
+        Log::channel('agrarexport')->debug('writer->close ended');
 
         DB::disableQueryLog();
         $sqllog = DB::getQueryLog();
