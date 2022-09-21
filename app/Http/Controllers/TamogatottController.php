@@ -15,12 +15,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TamogatottExcelResource;
 use App\Http\Resources\TamogatottResource;
 use App\Models\Tamogatott;
+use App\Traits\FileNameTrait;
 use Illuminate\Http\Request;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Writer\XLSX\Writer;
 
 class TamogatottController extends Controller
 {
+    use FileNameTrait;
+
     /**
      * Display a listing of the resource.
      *
@@ -69,6 +75,20 @@ class TamogatottController extends Controller
     public function show(Tamogatott $tamogatott)
     {
         return new TamogatottResource($tamogatott);
+    }
+
+    public function export(Request $request) {
+        $writer = new Writer();
+        $filename = $this->getFileName('entitas_');
+        $writer->openToBrowser($filename['filename']);
+
+        $writer->addRow(Row::fromValues(TamogatottExcelResource::getHeader()));
+
+        Tamogatott::all()->each(function ($cegcs) use ($request, $writer) {
+            $data = (new TamogatottExcelResource($cegcs))->toArray($request);
+            $writer->addRow(Row::fromValues($data));
+        });
+        $writer->close();
     }
 
 }

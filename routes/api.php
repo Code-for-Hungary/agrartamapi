@@ -58,6 +58,7 @@ Route::get('/cegcsoportexport', [CegcsoportController::class, 'export']);
 
 Route::get('/tamogatotts', [TamogatottController::class, 'index']);
 Route::get('/tamogatotts/{tamogatott}', [TamogatottController::class, 'show']);
+Route::get('/tamogatottexport', [TamogatottController::class, 'export']);
 
 Route::get('/tamogatasosszeg', TamogatasOsszegController::class);
 Route::get('/evestamogatasosszeg', EvesTamogatasOsszegController::class);
