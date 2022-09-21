@@ -15,16 +15,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\CegcsoportExcelResource;
 use App\Http\Resources\CegcsoportResource;
 use App\Models\Cegcsoport;
+use App\Traits\FileNameTrait;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Writer\XLSX\Writer;
 
 class CegcsoportController extends Controller
 {
+    use FileNameTrait;
+
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return AnonymousResourceCollection
      * @api {get} /cegcsoports Request Cégcsoport index
      * @apiSampleRequest off
      * @apiName GetCégcsoportIndex
@@ -57,7 +64,7 @@ class CegcsoportController extends Controller
      * Display the specified resource.
      *
      * @param \App\Models\Cegcsoport $cegcsoport
-     * @return \Illuminate\Http\Response
+     * @return CegcsoportResource
      * @api {get} /cegcsoports/:id Request cégcsoport information
      * @apiSampleRequest off
      * @apiName GetCégcsoport
@@ -71,4 +78,17 @@ class CegcsoportController extends Controller
         return new CegcsoportResource($cegcsoport);
     }
 
+    public function export(Request $request) {
+        $writer = new Writer();
+        $filename = $this->getFileName('cegcsoport_');
+        $writer->openToBrowser($filename['filename']);
+
+        $writer->addRow(Row::fromValues(CegcsoportExcelResource::getHeader()));
+
+        Cegcsoport::all()->each(function ($cegcs) use ($request, $writer) {
+            $data = (new CegcsoportExcelResource($cegcs))->toArray($request);
+            $writer->addRow(Row::fromValues($data));
+        });
+        $writer->close();
+    }
 }

@@ -54,6 +54,7 @@ Route::get('/telepules/{telepules}', [TelepulesController::class, 'show']);
 
 Route::get('/cegcsoports', [CegcsoportController::class, 'index']);
 Route::get('/cegcsoports/{cegcsoport}', [CegcsoportController::class, 'show']);
+Route::get('/cegcsoportexport', [CegcsoportController::class, 'export']);
 
 Route::get('/tamogatotts', [TamogatottController::class, 'index']);
 Route::get('/tamogatotts/{tamogatott}', [TamogatottController::class, 'show']);
