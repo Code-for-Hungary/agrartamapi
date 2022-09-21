@@ -172,7 +172,8 @@ class SearchController extends Controller
         $log = Kereseslog::fromRequest($request, 'exportforedit');
         DB::enableQueryLog();
 
-        $this->makeQuery($request)->lazy(env('EXPORT_CHUNK_SIZE', 10000))->each(function ($tam) use ($request, $writer) {
+        $this->makeQuery($request)->lazyById(env('EXPORT_CHUNK_SIZE', 10000), 'id')
+            ->each(function ($tam) use ($request, $writer) {
             $resource = new TamogatasExcelResource($tam);
             $res = $resource->toArray($request);
             $cellvalues = [];
