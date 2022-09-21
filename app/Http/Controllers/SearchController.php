@@ -176,6 +176,7 @@ class SearchController extends Controller
         $log = Kereseslog::fromRequest($request, 'exportforedit');
         DB::enableQueryLog();
 
+        Log::channel('agrarexport')->debug($request->all());
         Log::channel('agrarexport')->debug('lazyById started, chunk size: ' . env('EXPORT_CHUNK_SIZE', 10000));
 
         $this->makeQuery($request)->lazyById(env('EXPORT_CHUNK_SIZE', 10000), 'id')
