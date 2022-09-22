@@ -9,7 +9,10 @@ class TamogatottExcelResource extends JsonResource
     public static function getHeader() {
         return [
             'ID',
-            'Név'
+            'Név',
+            'Ir.szám',
+            'Város',
+            'Utca'
         ];
     }
 
@@ -23,7 +26,10 @@ class TamogatottExcelResource extends JsonResource
     {
         return [
             $this->id,
-            $this->name
+            $this->name,
+            $this->irszam,
+            $this->varos,
+            $this->utca
         ];
     }
 }
