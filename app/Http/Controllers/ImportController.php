@@ -48,16 +48,45 @@ class ImportController extends Controller
             $resp = [];
             if (($request->hasFile('cegcsoportimport') && $request->file('cegcsoportimport')->isValid()) ||
                 ($request->hasFile('entitasimport') && $request->file('entitasimport')->isValid()) ||
-                ($request->hasFile('import') && $request->file('import')->isValid())
+                ($request->hasFile('import') && $request->file('import')->isValid()) ||
+                ($request->hasFile('alapimport') && $request->file('alapimport')->isValid()) ||
+                ($request->hasFile('jogcimimport') && $request->file('jogcimimport')->isValid())
                 ) {
+                if ($request->hasFile('alapimport')) {
+                    $file = $request->file('alapimport');
+                    $path = $file->storeAs('local', uniqid('alap') . '.' . $file->extension());
+
+                    $ret = $this->alapImport(Storage::path($path));
+
+                    if (env('IMPORT_REMOVE_UPLOAD', false)) {
+                        @\unlink(Storage::path($path));
+                    }
+
+                    if ($ret['isError']) {
+                        return redirect($ret['value']);
+                    }
+                    $resp[] = ['alap modified' => $ret['value']];
+                }
+                if ($request->hasFile('jogcimimport')) {
+                    $file = $request->file('jogcimimport');
+                    $path = $file->storeAs('local', uniqid('jogcim') . '.' . $file->extension());
+
+                    $ret = $this->jogcimImport(Storage::path($path));
+
+                    if (env('IMPORT_REMOVE_UPLOAD', false)) {
+                        @\unlink(Storage::path($path));
+                    }
+
+                    if ($ret['isError']) {
+                        return redirect($ret['value']);
+                    }
+                    $resp[] = ['jogcim modified' => $ret['value']];
+                }
                 if ($request->hasFile('cegcsoportimport')) {
                     $file = $request->file('cegcsoportimport');
                     $path = $file->storeAs('local', uniqid('cegcsoport') . '.' . $file->extension());
 
-                    $ret = $this->cegcsoportImport(
-                        Storage::path($path),
-                        $file->getClientOriginalName()
-                    );
+                    $ret = $this->cegcsoportImport(Storage::path($path));
 
                     if (env('IMPORT_REMOVE_UPLOAD', false)) {
                         @\unlink(Storage::path($path));
@@ -72,10 +101,7 @@ class ImportController extends Controller
                     $file = $request->file('entitasimport');
                     $path = $file->storeAs('local', uniqid('agrar') . '.' . $file->extension());
 
-                    $ret = $this->entitasImport(
-                        Storage::path($path),
-                        $file->getClientOriginalName()
-                    );
+                    $ret = $this->entitasImport(Storage::path($path));
 
                     if (env('IMPORT_REMOVE_UPLOAD', false)) {
                         @\unlink(Storage::path($path));
@@ -102,7 +128,7 @@ class ImportController extends Controller
                     if ($ret['isError']) {
                         return redirect($ret['value']);
                     }
-                    $resp[] = ['modified' => $ret['value']];
+                    $resp[] = ['támogatás modified' => $ret['value']];
                 }
                 return response($resp);
             }
@@ -112,7 +138,7 @@ class ImportController extends Controller
         }
     }
 
-    protected function cegcsoportImport($filepath, $orgfilename)
+    protected function cegcsoportImport($filepath)
     {
         $writer = new Writer();
         $outfilename = $this->getFileName('cegcsoport_');
@@ -182,7 +208,137 @@ class ImportController extends Controller
         }
     }
 
-    protected function entitasImport($filepath, $orgfilename)
+    protected function alapImport($filepath)
+    {
+        $writer = new Writer();
+        $outfilename = $this->getFileName('alap_');
+        $writer->openToFile($outfilename['fullfilename']);
+
+        try {
+            DB::beginTransaction();
+
+            $waserror = false;
+            $reader = new Reader();
+            $reader->open($filepath);
+            foreach ($reader->getSheetIterator() as $sheet) {
+                if ($sheet->getIndex() === 0) {
+                    $rowcnt = 0;
+                    $modifiedcnt = 0;
+                    foreach ($sheet->getRowIterator() as $row) {
+                        $error = [];
+
+                        $cells = $row->getCells();
+
+                        if ($rowcnt === 0) {
+                            $writer->addRow($row);
+                        } else {
+                            $id = $cells[$this->n('A')]->getValue();
+                            if (!$id) {
+                                $error[] = 'Nincs ID megadva';
+                            }
+                            $sorrend = $cells[$this->n('C')]->getValue();
+                            if ($error) {
+                                $row->addCell(Cell::fromValue(implode(';', $error)));
+                                $writer->addRow($row);
+                                $waserror = true;
+                            } else {
+                                $obj = Alap::find($id);
+                                if ($obj) {
+                                    $obj->sorrend = $sorrend;
+                                    $obj->save();
+                                }
+                                $modifiedcnt++;
+                            }
+                        }
+                        $rowcnt++;
+                    }
+                }
+            }
+            DB::commit();
+            $reader->close();
+            $writer->close();
+            if ($waserror) {
+                return [
+                    'isError' => true,
+                    'value' => asset('storage/' . $outfilename['filename'], true)
+                ];
+            }
+            return [
+                'isError' => false,
+                'value' => $modifiedcnt
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    protected function jogcimImport($filepath)
+    {
+        $writer = new Writer();
+        $outfilename = $this->getFileName('jogcim_');
+        $writer->openToFile($outfilename['fullfilename']);
+
+        try {
+            DB::beginTransaction();
+
+            $waserror = false;
+            $reader = new Reader();
+            $reader->open($filepath);
+            foreach ($reader->getSheetIterator() as $sheet) {
+                if ($sheet->getIndex() === 0) {
+                    $rowcnt = 0;
+                    $modifiedcnt = 0;
+                    foreach ($sheet->getRowIterator() as $row) {
+                        $error = [];
+
+                        $cells = $row->getCells();
+
+                        if ($rowcnt === 0) {
+                            $writer->addRow($row);
+                        } else {
+                            $id = $cells[$this->n('A')]->getValue();
+                            if (!$id) {
+                                $error[] = 'Nincs ID megadva';
+                            }
+                            $sorrend = $cells[$this->n('C')]->getValue();
+                            if ($error) {
+                                $row->addCell(Cell::fromValue(implode(';', $error)));
+                                $writer->addRow($row);
+                                $waserror = true;
+                            } else {
+                                $obj = Jogcim::find($id);
+                                if ($obj) {
+                                    $obj->sorrend = $sorrend;
+                                    $obj->save();
+                                }
+                                $modifiedcnt++;
+                            }
+                        }
+                        $rowcnt++;
+                    }
+                }
+            }
+            DB::commit();
+            $reader->close();
+            $writer->close();
+            if ($waserror) {
+                return [
+                    'isError' => true,
+                    'value' => asset('storage/' . $outfilename['filename'], true)
+                ];
+            }
+            return [
+                'isError' => false,
+                'value' => $modifiedcnt
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    protected function entitasImport($filepath)
     {
         $writer = new Writer();
         $outfilename = $this->getFileName('entitas_');
