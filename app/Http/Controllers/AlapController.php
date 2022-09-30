@@ -50,7 +50,12 @@ class AlapController extends Controller
      */
     public function index()
     {
-        return AlapResource::collection(Alap::all());
+        return AlapResource::collection(
+            Alap::select()
+                ->orderBy('sorrend', 'asc')
+                ->orderBy('name', 'asc')
+                ->get()
+        );
     }
 
     /**
