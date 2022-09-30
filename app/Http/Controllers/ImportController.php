@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Reader\XLSX\Reader;
 use OpenSpout\Writer\XLSX\Writer;
@@ -32,6 +31,11 @@ class ImportController extends Controller
     private $cegcsoportCache = [];
     private $telepulesCache = [];
 
+    private function n($char)
+    {
+        return ord($char) - 65;
+    }
+
     /**
      * Handle the incoming request.
      *
@@ -41,37 +45,227 @@ class ImportController extends Controller
     public function __invoke(Request $request)
     {
         if ($request->input('password') === env('IMPORT_PASSWORD')) {
-            if ($request->hasFile('import') && $request->file('import')->isValid()) {
-                $file = $request->file('import');
-                $path = $file->storeAs('local', uniqid('agrar') . '.' . $file->extension());
+            $resp = [];
+            if (($request->hasFile('cegcsoportimport') && $request->file('cegcsoportimport')->isValid()) ||
+                ($request->hasFile('entitasimport') && $request->file('entitasimport')->isValid()) ||
+                ($request->hasFile('import') && $request->file('import')->isValid())
+                ) {
+                if ($request->hasFile('cegcsoportimport')) {
+                    $file = $request->file('cegcsoportimport');
+                    $path = $file->storeAs('local', uniqid('cegcsoport') . '.' . $file->extension());
 
-                $ret = $this->import(
-                    Storage::path($path),
-                    $file->getClientOriginalName()
-                );
+                    $ret = $this->cegcsoportImport(
+                        Storage::path($path),
+                        $file->getClientOriginalName()
+                    );
 
-                if (env('IMPORT_REMOVE_UPLOAD', false)) {
-                    @\unlink(Storage::path($path));
+                    if (env('IMPORT_REMOVE_UPLOAD', false)) {
+                        @\unlink(Storage::path($path));
+                    }
+
+                    if ($ret['isError']) {
+                        return redirect($ret['value']);
+                    }
+                    $resp[] = ['cégcsoport modified' => $ret['value']];
                 }
+                if ($request->hasFile('entitasimport')) {
+                    $file = $request->file('entitasimport');
+                    $path = $file->storeAs('local', uniqid('agrar') . '.' . $file->extension());
 
-                if ($ret['isError']) {
-                    return redirect($ret['value']);
+                    $ret = $this->entitasImport(
+                        Storage::path($path),
+                        $file->getClientOriginalName()
+                    );
+
+                    if (env('IMPORT_REMOVE_UPLOAD', false)) {
+                        @\unlink(Storage::path($path));
+                    }
+
+                    if ($ret['isError']) {
+                        return redirect($ret['value']);
+                    }
+                    $resp[] = ['entitás modified' => $ret['value']];
                 }
-                return response(['modified' => $ret['value']]);
-            } else {
-                return response('Baad request', 400);
+                if ($request->hasFile('import')) {
+                    $file = $request->file('import');
+                    $path = $file->storeAs('local', uniqid('agrar') . '.' . $file->extension());
+
+                    $ret = $this->import(
+                        Storage::path($path),
+                        $file->getClientOriginalName()
+                    );
+
+                    if (env('IMPORT_REMOVE_UPLOAD', false)) {
+                        @\unlink(Storage::path($path));
+                    }
+
+                    if ($ret['isError']) {
+                        return redirect($ret['value']);
+                    }
+                    $resp[] = ['modified' => $ret['value']];
+                }
+                return response($resp);
             }
+            return response('Baad request', 400);
         } else {
             return response('Forbidden', 403);
         }
     }
 
+    protected function cegcsoportImport($filepath, $orgfilename)
+    {
+        $writer = new Writer();
+        $outfilename = $this->getFileName('cegcsoport_');
+        $writer->openToFile($outfilename['fullfilename']);
+
+        try {
+            DB::beginTransaction();
+
+            $waserror = false;
+            $reader = new Reader();
+            $reader->open($filepath);
+            foreach ($reader->getSheetIterator() as $sheet) {
+                if ($sheet->getIndex() === 0) {
+                    $rowcnt = 0;
+                    $modifiedcnt = 0;
+                    foreach ($sheet->getRowIterator() as $row) {
+                        $error = [];
+
+                        $cells = $row->getCells();
+
+                        if ($rowcnt === 0) {
+                            $writer->addRow($row);
+                        } else {
+                            $id = $cells[$this->n('A')]->getValue();
+                            if (!$id) {
+                                $error[] = 'Nincs ID megadva';
+                            }
+                            $name = $cells[$this->n('B')]->getValue();
+                            if (!$name) {
+                                $error[] = 'Nincs név megadva';
+                            }
+                            if ($error) {
+                                $row->addCell(Cell::fromValue(implode(';', $error)));
+                                $writer->addRow($row);
+                                $waserror = true;
+                            } else {
+                                $obj = Cegcsoport::find($id);
+                                if (!$obj) {
+                                    $obj = new Cegcsoport();
+                                }
+                                $obj->id = $id;
+                                $obj->name = $name;
+                                $obj->save();
+                                $modifiedcnt++;
+                            }
+                        }
+                        $rowcnt++;
+                    }
+                }
+            }
+            DB::commit();
+            $reader->close();
+            $writer->close();
+            if ($waserror) {
+                return [
+                    'isError' => true,
+                    'value' => asset('storage/' . $outfilename['filename'], true)
+                ];
+            }
+            return [
+                'isError' => false,
+                'value' => $modifiedcnt
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    protected function entitasImport($filepath, $orgfilename)
+    {
+        $writer = new Writer();
+        $outfilename = $this->getFileName('entitas_');
+        $writer->openToFile($outfilename['fullfilename']);
+
+        try {
+            DB::beginTransaction();
+
+            $waserror = false;
+            $reader = new Reader();
+            $reader->open($filepath);
+            foreach ($reader->getSheetIterator() as $sheet) {
+                if ($sheet->getIndex() === 0) {
+                    $rowcnt = 0;
+                    $modifiedcnt = 0;
+                    foreach ($sheet->getRowIterator() as $row) {
+                        $error = [];
+
+                        $cells = $row->getCells();
+
+                        if ($rowcnt === 0) {
+                            $writer->addRow($row);
+                        } else {
+                            $id = $cells[$this->n('A')]->getValue();
+                            if (!$id) {
+                                $error[] = 'Nincs ID megadva';
+                            }
+                            $name = $cells[$this->n('B')]->getValue();
+                            if (!$name) {
+                                $error[] = 'Nincs név megadva';
+                            }
+                            $irszam = $cells[$this->n('D')]->getValue();
+                            $varos = $cells[$this->n('E')]->getValue();
+                            $utca = $cells[$this->n('F')]->getValue();
+                            if ($error) {
+                                $row->addCell(Cell::fromValue(implode(';', $error)));
+                                $writer->addRow($row);
+                                $waserror = true;
+                            } else {
+                                $obj = Tamogatott::find($id);
+                                if (!$obj) {
+                                    $obj = new Tamogatott();
+                                }
+                                $obj->id = $id;
+                                $obj->name = $name;
+                                if ($irszam) {
+                                    $obj->irszam = $irszam;
+                                }
+                                if ($varos) {
+                                    $obj->varos = $varos;
+                                }
+                                if ($utca) {
+                                    $obj->utca = $utca;
+                                }
+                                $obj->save();
+                                $modifiedcnt++;
+                            }
+                        }
+                        $rowcnt++;
+                    }
+                }
+            }
+            DB::commit();
+            $reader->close();
+            $writer->close();
+            if ($waserror) {
+                return [
+                    'isError' => true,
+                    'value' => asset('storage/' . $outfilename['filename'], true)
+                ];
+            }
+            return [
+                'isError' => false,
+                'value' => $modifiedcnt
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
     protected function import($filepath, $orgfilename)
     {
-        function n($char) {
-            return ord($char) - 65;
-        }
-
         $writer = new Writer();
         $outfilename = $this->getFileName();
         $writer->openToFile($outfilename['fullfilename']);
@@ -101,20 +295,20 @@ class ImportController extends Controller
                             $writer->addRow($row);
                         }
                         else {
-                            $id = $cells[n('A')]->getValue();
+                            $id = $cells[$this->n('A')]->getValue();
                             if (!$id) {
                                 $error[] = 'Nincs ID megadva, új felvitel nincs implementálva';
                             }
 
-                            $cegcsoport_id = $cells[n('K')]->getValue();
-                            $cegcsoport_name = $cells[n('L')]->getValue();
+                            $cegcsoport_id = $cells[$this->n('K')]->getValue();
+                            $cegcsoport_name = $cells[$this->n('L')]->getValue();
                             $cegcsoport = $this->getCegcsoport($cegcsoport_id, $cegcsoport_name);
                             if ($cegcsoport === false) {
                                 $error[] = 'Új cégcsoport, de nincs név megadva';
                             }
 
-                            $tamogatott_id = $cells[n('M')]->getValue();
-                            $tamogatott_name = $cells[n('N')]->getValue();
+                            $tamogatott_id = $cells[$this->n('M')]->getValue();
+                            $tamogatott_name = $cells[$this->n('N')]->getValue();
                             $tamogatott = $this->getTamogatott($tamogatott_id, $tamogatott_name);
                             if ($tamogatott === false) {
                                 $error[] = 'Új támogatott entitás, de nincs név megadva';
