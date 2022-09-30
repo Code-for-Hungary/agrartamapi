@@ -46,6 +46,7 @@ class ImportController extends Controller
     {
         if ($request->input('password') === env('IMPORT_PASSWORD')) {
             $resp = [];
+            $haserror = false;
             if (($request->hasFile('cegcsoportimport') && $request->file('cegcsoportimport')->isValid()) ||
                 ($request->hasFile('entitasimport') && $request->file('entitasimport')->isValid()) ||
                 ($request->hasFile('import') && $request->file('import')->isValid()) ||
@@ -63,9 +64,12 @@ class ImportController extends Controller
                     }
 
                     if ($ret['isError']) {
-                        return redirect($ret['value']);
+                        $resp[] = ['alap errors' => $ret['value']];
+                        $haserror = true;
                     }
-                    $resp[] = ['alap modified' => $ret['value']];
+                    else {
+                        $resp[] = ['alap modified' => $ret['value']];
+                    }
                 }
                 if ($request->hasFile('jogcimimport')) {
                     $file = $request->file('jogcimimport');
@@ -78,9 +82,12 @@ class ImportController extends Controller
                     }
 
                     if ($ret['isError']) {
-                        return redirect($ret['value']);
+                        $resp[] = ['jogcim errors' => $ret['value']];
+                        $haserror = true;
                     }
-                    $resp[] = ['jogcim modified' => $ret['value']];
+                    else {
+                        $resp[] = ['jogcim modified' => $ret['value']];
+                    }
                 }
                 if ($request->hasFile('cegcsoportimport')) {
                     $file = $request->file('cegcsoportimport');
@@ -93,9 +100,12 @@ class ImportController extends Controller
                     }
 
                     if ($ret['isError']) {
-                        return redirect($ret['value']);
+                        $resp[] = ['cégcsoport errors' => $ret['value']];
+                        $haserror = true;
                     }
-                    $resp[] = ['cégcsoport modified' => $ret['value']];
+                    else {
+                        $resp[] = ['cégcsoport modified' => $ret['value']];
+                    }
                 }
                 if ($request->hasFile('entitasimport')) {
                     $file = $request->file('entitasimport');
@@ -108,11 +118,14 @@ class ImportController extends Controller
                     }
 
                     if ($ret['isError']) {
-                        return redirect($ret['value']);
+                        $resp[] = ['entitás errors' => $ret['value']];
+                        $haserror = true;
                     }
-                    $resp[] = ['entitás modified' => $ret['value']];
+                    else {
+                        $resp[] = ['entitás modified' => $ret['value']];
+                    }
                 }
-                if ($request->hasFile('import')) {
+                if (!$haserror && $request->hasFile('import')) {
                     $file = $request->file('import');
                     $path = $file->storeAs('local', uniqid('agrar') . '.' . $file->extension());
 
@@ -126,9 +139,11 @@ class ImportController extends Controller
                     }
 
                     if ($ret['isError']) {
-                        return redirect($ret['value']);
+                        $resp[] = ['támogatás errors' => $ret['value']];
                     }
-                    $resp[] = ['támogatás modified' => $ret['value']];
+                    else {
+                        $resp[] = ['támogatás modified' => $ret['value']];
+                    }
                 }
                 return response($resp);
             }
