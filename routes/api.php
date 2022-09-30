@@ -39,12 +39,14 @@ Route::get('/evs', [EvController::class, 'index']);
 
 Route::get('/alaps', [AlapController::class, 'index']);
 Route::get('/alaps/{alap}', [AlapController::class, 'show']);
+Route::get('/alapexport', [AlapController::class, 'export']);
 
 Route::get('/forras', [ForrasController::class, 'index']);
 Route::get('/forras/{forras}', [ForrasController::class, 'show']);
 
 Route::get('/jogcims', [JogcimController::class, 'index']);
 Route::get('/jogcims/{jogcim}', [JogcimController::class, 'show']);
+Route::get('/jogcimexport', [JogcimController::class, 'export']);
 
 Route::get('/megyes', [MegyeController::class, 'index']);
 Route::get('/megyes/{megye}', [MegyeController::class, 'show']);

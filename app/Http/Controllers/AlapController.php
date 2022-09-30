@@ -15,12 +15,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\AlapExcelResource;
 use App\Http\Resources\AlapResource;
 use App\Models\Alap;
+use App\Traits\FileNameTrait;
 use Illuminate\Http\Request;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Writer\XLSX\Writer;
 
 class AlapController extends Controller
 {
+    use FileNameTrait;
+
     /**
      * Display a listing of the resource.
      *
@@ -74,6 +80,20 @@ class AlapController extends Controller
     public function show(Alap $alap)
     {
         return new AlapResource($alap);
+    }
+
+    public function export(Request $request) {
+        $writer = new Writer();
+        $filename = $this->getFileName('alap_');
+        $writer->openToBrowser($filename['filename']);
+
+        $writer->addRow(Row::fromValues(AlapExcelResource::getHeader()));
+
+        Alap::all()->each(function ($cegcs) use ($request, $writer) {
+            $data = (new AlapExcelResource($cegcs))->toArray($request);
+            $writer->addRow(Row::fromValues($data));
+        });
+        $writer->close();
     }
 
 }

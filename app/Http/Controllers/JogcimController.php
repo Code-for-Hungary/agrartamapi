@@ -15,12 +15,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\JogcimExcelResource;
 use App\Http\Resources\JogcimResource;
 use App\Models\Jogcim;
+use App\Traits\FileNameTrait;
 use Illuminate\Http\Request;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Writer\XLSX\Writer;
 
 class JogcimController extends Controller
 {
+    use FileNameTrait;
+
     /**
      * Display a listing of the resource.
      *
@@ -75,6 +81,20 @@ class JogcimController extends Controller
     public function show(Jogcim $jogcim)
     {
         return new JogcimResource($jogcim);
+    }
+
+    public function export(Request $request) {
+        $writer = new Writer();
+        $filename = $this->getFileName('jogcim_');
+        $writer->openToBrowser($filename['filename']);
+
+        $writer->addRow(Row::fromValues(JogcimExcelResource::getHeader()));
+
+        Jogcim::all()->each(function ($cegcs) use ($request, $writer) {
+            $data = (new JogcimExcelResource($cegcs))->toArray($request);
+            $writer->addRow(Row::fromValues($data));
+        });
+        $writer->close();
     }
 
 }
