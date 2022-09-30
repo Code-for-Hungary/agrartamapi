@@ -214,6 +214,7 @@ class ImportController extends Controller
                             if (!$name) {
                                 $error[] = 'Nincs név megadva';
                             }
+                            $kurl = $cells[$this->n('C')]->getValue();
                             $irszam = $cells[$this->n('D')]->getValue();
                             $varos = $cells[$this->n('E')]->getValue();
                             $utca = $cells[$this->n('F')]->getValue();
@@ -228,6 +229,9 @@ class ImportController extends Controller
                                 }
                                 $obj->id = $id;
                                 $obj->name = $name;
+                                if ($kurl) {
+                                    $obj->kurl = $kurl;
+                                }
                                 if ($irszam) {
                                     $obj->irszam = $irszam;
                                 }

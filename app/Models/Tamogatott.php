@@ -28,6 +28,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Tamogatott whereIrszam($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Tamogatott whereUtca($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Tamogatott whereVaros($value)
+ * @property string $kurl
+ * @method static \Illuminate\Database\Eloquent\Builder|Tamogatott whereKurl($value)
  */
 class Tamogatott extends Model
 {

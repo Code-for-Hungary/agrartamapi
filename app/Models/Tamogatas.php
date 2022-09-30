@@ -64,6 +64,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Tamogatas whereForrasadatId($value)
  * @property int|null $telepules_id
  * @method static \Illuminate\Database\Eloquent\Builder|Tamogatas whereTelepulesId($value)
+ * @property-read \App\Models\Telepules|null $telepules
  */
 class Tamogatas extends Model
 {

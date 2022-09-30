@@ -10,6 +10,7 @@ class TamogatottExcelResource extends JsonResource
         return [
             'ID',
             'Név',
+            'K-url',
             'Ir.szám',
             'Város',
             'Utca'
@@ -27,6 +28,7 @@ class TamogatottExcelResource extends JsonResource
         return [
             $this->id,
             $this->name,
+            $this->kurl,
             $this->irszam,
             $this->varos,
             $this->utca
