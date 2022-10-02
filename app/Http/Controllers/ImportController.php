@@ -524,7 +524,6 @@ class ImportController extends Controller
             DB::commit();
             $reader->close();
             $writer->close();
-            Log::channel('agrarimport')->debug($valtozottak);
             Log::channel('agrarimport')->debug('import ended. modified: ' . $modifiedcnt);
             if ($waserror) {
                 return [
