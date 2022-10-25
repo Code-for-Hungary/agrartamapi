@@ -28,7 +28,8 @@ class TamogatasExcelResource extends JsonResource
             ['col' => 'Q', 'data' => 'Alap'],
             ['col' => 'R', 'data' => 'Forrás'],
             ['col' => 'S', 'data' => 'Föld. alapú'],
-            ['col' => 'T', 'data' => 'Összeg']
+            ['col' => 'T', 'data' => 'Összeg'],
+            ['col' => 'U', 'data' => 'Adott évi összes támogatás']
         ];
     }
 
@@ -60,7 +61,8 @@ class TamogatasExcelResource extends JsonResource
             ['col' => 'Q', 'data' => $this->alap?->name],
             ['col' => 'R', 'data' => $this->forras?->name],
             ['col' => 'S', 'data' => $this->is_landbased],
-            ['col' => 'T', 'data' => $this->osszeg]
+            ['col' => 'T', 'data' => $this->osszeg],
+            ['col' => 'U', 'data' => $this->evesosszeg]
         ];
     }
 }
