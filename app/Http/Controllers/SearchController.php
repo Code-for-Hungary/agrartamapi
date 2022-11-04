@@ -132,7 +132,9 @@ class SearchController extends Controller
 
     protected function preprocessNameFilter($name)
     {
-        $name = trim(mb_ereg_replace('([()])', '', $name));
+        $name = trim($name);
+        $name = mb_ereg_replace('\s+', ' ', $name);
+        $name = mb_ereg_replace('([()])', '', $name);
         if ($name) {
             if (!mb_ereg('(["+\-~*])', $name)) {
                 return '+' . mb_ereg_replace('([\s])', ' +', $name);
